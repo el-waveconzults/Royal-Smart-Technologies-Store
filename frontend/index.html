@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Royal Smart Technologies</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="topbar">
+        <div class="logo">
+          <img src="../images/logos/Royal smart logo.jpg" alt="Royal logo" />
+          <span>Royal smart technologies</span>
+        </div>
+        <div class="search-area">
+          <input id="search" placeholder="Search Product....." />
+          <select id="category-select">
+            <option>Laptops</option>
+            <option>Phones</option>
+            <option>Accessories</option>
+          </select>
+          <button id="search-btn">Search</button>
+        </div>
+        <div class="icons">
+          <button class="icon-btn">♡</button>
+          <button class="icon-btn">🛒</button>
+          <button class="icon-btn">👤</button>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <!-- Categories Wrapper: Holds the button and the dropdown panel together -->
+        <div class="categories-wrapper">
+          <button class="categories-toggle" id="categoriesToggle">
+            ☰ All Categories ▾
+          </button>
+
+          <!-- Categories Panel: Hidden by default, toggled via JS -->
+          <aside
+            class="categories-panel"
+            id="categoriesPanel"
+            aria-hidden="true">
+            <ul>
+              <li>
+                Phones ▸
+                <ul>
+                  <li>Iphone</li>
+                  <li>Samsung</li>
+                </ul>
+              </li>
+              <li>
+                Laptops ▸
+                <ul>
+                  <li>Macbook</li>
+                  <li>HP laptops</li>
+                </ul>
+              </li>
+              <li>Software Accessories</li>
+              <li>Tablet / iPad</li>
+              <li>Chargers</li>
+            </ul>
+          </aside>
+        </div>
+
+        <!-- Main Navigation Links -->
+        <ul class="nav-links">
+          <li><a href="#">Home</a></li>
+          <li>
+            <a href="#">Shop ▾</a>
+            <ul class="dropdown">
+              <li><a href="#">Shop List View</a></li>
+              <li><a href="#">Shop Category Icon</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#">Pages ▾</a>
+            <ul class="dropdown">
+              <li><a href="#">Product-details</a></li>
+              <li><a href="#">FAQ</a></li>
+            </ul>
+          </li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="carousel" id="carousel">
+          <div
+            class="slide active"
+            style="
+              background-image: url('../images/homepage-one/slide\ image\ card\ one.jpg');
+            ">
+            <!-- Added special class 'dark-text' for black text color -->
+            <div class="caption dark-text">
+              <h2>Welcome</h2>
+              <h1>To Royal Smart Technologies</h1>
+              <p>Your No.1 Plug for premium Gadgets & Smart Devices.</p>
+              <a class="btn" href="#">Go Shopping ▸</a>
+            </div>
+          </div>
+          <div
+            class="slide"
+            style="
+              background-image: url('../images/homepage-one/slide\ image\ card\ two.webp');
+            ">
+            <!-- Added special class 'dark-text' for black text color -->
+            <div class="caption dark-text">
+              <h1>Royal Smart Technologies</h1>
+              <p>
+                Smart Choices. Royal Quality. Order today — get it delivered to
+                your doorstep.
+              </p>
+              <a class="btn" href="#">Browse Collection ▸</a>
+            </div>
+          </div>
+          <div
+            class="slide"
+            style="
+              background-image: url('../images/homepage-one/slide\ image\ card\ three.jpg');
+            ">
+            <div class="caption">
+              <h2>Latest Devices</h2>
+              <h1>Discover the newest phones at competitive prices.</h1>
+              <p>-100% Authentic</p>
+              <a class="btn" href="#">Shop Devices ▸</a>
+            </div>
+          </div>
+
+          <button class="carousel-control prev" data-direction="prev">‹</button>
+          <button class="carousel-control next" data-direction="next">›</button>
+          <div class="indicators" id="indicators"></div>
+        </div>
+      </section>
+
+      <!-- 
+        Our Categories Section 
+        Displays a grid of product categories with circular images.
+        Images are animated to fade in from the left using JavaScript.
+      -->
+      <section class="our-categories" id="ourCategories">
+        <div class="container">
+          <div class="section-header">
+            <h2>Our Categories</h2>
+            <a href="#" class="view-all">View All</a>
+          </div>
+
+          <div class="categories-grid">
+            <!-- Row 1 -->
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/product-img/Iphone 14 pro max.jpg"
+                  alt="Iphone 14pro max" />
+              </div>
+              <p>Iphone 14pro max</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Apple-iPhone-Air-Sky-Blue.webp"
+                  alt="Iphone 14 Air" />
+              </div>
+              <p>Iphone 14 Air</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/MacBook-Pro-20211.webp"
+                  alt="Macbook" />
+              </div>
+              <p>Macbook</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Home theater.jpeg"
+                  alt="Home Theater" />
+              </div>
+              <p>Home Theater</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img src="../images/homepage-one/Ps4.jpg" alt="Ps4" />
+              </div>
+              <p>Ps4</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Samsung-Galaxy-S22-Ultra.webp"
+                  alt="Samsung S22 Ultra" />
+              </div>
+              <p>Samsung S22 Ultra</p>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Hp laptop.jpeg"
+                  alt="HP Laptop" />
+              </div>
+              <p>HP Laptop</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img src="../images/homepage-one/ipad-pro.jpeg" alt="Ipad" />
+              </div>
+              <p>Ipad</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Galaxy-Tab.jpg"
+                  alt="Galaxy Tab" />
+              </div>
+              <p>Galaxy Tab</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Laptop bags.jpeg"
+                  alt="Laptop Bags" />
+              </div>
+              <p>Laptop Bags</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/bluetooth-headphones.webp"
+                  alt="Head Phones" />
+              </div>
+              <p>Head Phones</p>
+            </div>
+
+            <div class="category-item">
+              <div class="img-wrapper">
+                <img
+                  src="../images/homepage-one/Fast charger.webp"
+                  alt="Fast Chargers" />
+              </div>
+              <p>Fast Chargers</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        Trusted Brands Section 
+        Displays a list of partner companies.
+        Text fades in from left, logos simply appear.
+      -->
+      <section class="trusted-brands" id="trustedBrands">
+        <div class="container">
+          <div class="brands-wrapper">
+            <!-- Left Side: Text Description -->
+            <div class="brands-text">
+              <h2>
+                Hundreds of companies have been powered by
+                <strong>Royal smart.</strong>
+              </h2>
+            </div>
+
+            <!-- Right Side: Brand Logos Grid -->
+            <div class="brands-grid">
+              <div class="brand-item">
+                <img src="../images/homepage-one/Apple_logo.png" alt="Apple" />
+              </div>
+              <div class="brand-item">
+                <img
+                  src="../images/homepage-one/samsung logo.png"
+                  alt="Samsung" />
+              </div>
+              <div class="brand-item">
+                <img
+                  src="../images/homepage-one/beats-by-dr-dre-logo.png"
+                  alt="Beats" />
+              </div>
+              <div class="brand-item">
+                <img src="../images/homepage-one/hp-logo.png" alt="HP" />
+              </div>
+              <div class="brand-item">
+                <img src="../images/homepage-one/Sony-Logo.png" alt="Sony" />
+              </div>
+              <div class="brand-item">
+                <img src="../images/homepage-one/LG-Logo.png" alt="LG" />
+              </div>
+              <div class="brand-item">
+                <img src="../images/homepage-one/Intel_logo.png" alt="Intel" />
+              </div>
+              <div class="brand-item">
+                <img
+                  src="../images/homepage-one/Microsoft_logo.png"
+                  alt="Microsoft" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        New Arrivals Section
+        Displays a grid of new products.
+        Images fade in from bottom. Hovering image shows action icons.
+        Prices use Nigerian Naira (₦).
+      -->
+      <section class="new-arrivals" id="newArrivals">
+        <div class="container">
+          <div class="section-header">
+            <h2>NEW ARRIVALS</h2>
+            <a href="#" class="view-all">View All</a>
+          </div>
+
+          <div class="products-grid">
+            <!-- Product 1 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/iphone 17 air new arrival.jpg"
+                  alt="Iphone 17 Air" />
+                <!-- Overlay Icons -->
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Iphone 17 Air</h3>
+                <div class="price">
+                  <span class="old-price">₦250,000</span>
+                  <span class="new-price">₦600,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/table microphone new arrival.jpg"
+                  alt="Table Microphone" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Table Microphone</h3>
+                <div class="price">
+                  <span class="old-price">₦9,990</span>
+                  <span class="new-price">₦99,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/iphone pouch new arrival.jpg"
+                  alt="Iphone pouch" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Iphone pouch</h3>
+                <div class="price">
+                  <span class="old-price">₦18,990</span>
+                  <span class="new-price">₦5,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/blender new arrival.jpg"
+                  alt="Blender" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Blender</h3>
+                <div class="price">
+                  <span class="old-price">₦20,990</span>
+                  <span class="new-price">₦50,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/play station new arrival.jpg"
+                  alt="Play station" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Play station</h3>
+                <div class="price">
+                  <span class="old-price">₦20,990</span>
+                  <span class="new-price">₦1,000,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/magnetic fast charger new arrival.jpg"
+                  alt="Magnetic fast charger" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Magnetic fast charger</h3>
+                <div class="price">
+                  <span class="old-price">₦5,990</span>
+                  <span class="new-price">₦9,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 7 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Iphone 17 pro max new arrival.jpg"
+                  alt="Iphone 17 pro max" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Iphone 17 pro max</h3>
+                <div class="price">
+                  <span class="old-price">₦19,990</span>
+                  <span class="new-price">₦1,800,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 8 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Samsung Galaxy_S22_Ultra.jpg"
+                  alt="Samsung Galaxy S22 Ultra" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Samsung Galaxy S22 Ultra</h3>
+                <div class="price">
+                  <span class="old-price">₦25,990</span>
+                  <span class="new-price">₦13,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        Discount Banners Section
+        Two side-by-side promotional banners with hover effects.
+      -->
+      <section class="discount-banners">
+        <div class="container">
+          <div class="banners-grid">
+            <!-- Banner 1 -->
+            <div
+              class="banner-item"
+              style="
+                background-image: url('../images/homepage-one/discount-1.jpg');
+              ">
+              <div class="banner-content">
+                <span class="banner-tag">New Style</span>
+                <h2>
+                  Get <span class="highlight">65% Offer</span><br />& Make
+                  New<br />Fusion.
+                </h2>
+                <a href="#" class="shop-now-btn">Shop Now ➝</a>
+              </div>
+            </div>
+
+            <!-- Banner 2 -->
+            <div
+              class="banner-item"
+              style="
+                background-image: url('../images/homepage-one/discount-2.jpg');
+              ">
+              <div class="banner-content">
+                <span class="banner-tag">New Style</span>
+                <h2>
+                  Get <span class="highlight">65% Offer</span><br />& Make
+                  New<br />Fusion.
+                </h2>
+                <a href="#" class="shop-now-btn">Shop Now ➝</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        Flash Sale Section
+        Countdown timer with colorful numbers and product grid.
+      -->
+      <section class="flash-sale" id="flashSale">
+        <div class="container">
+          <div class="flash-header">
+            <h2>Flash Sale</h2>
+            <div class="flash-countdown">
+              <div class="count-item count-days">
+                <div class="number" data-unit="days">0</div>
+                <div class="label">Days</div>
+              </div>
+              <div class="count-item count-hours">
+                <div class="number" data-unit="hours">0</div>
+                <div class="label">Hours</div>
+              </div>
+              <div class="count-item count-minutes">
+                <div class="number" data-unit="minutes">0</div>
+                <div class="label">Minutes</div>
+              </div>
+              <div class="count-item count-seconds">
+                <div class="number" data-unit="seconds">0</div>
+                <div class="label">seconds</div>
+              </div>
+            </div>
+            <a href="#" class="view-all">View All</a>
+          </div>
+
+          <div class="products-grid flash-grid">
+            <!-- Product A -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/mozoter s8 earbud.webp"
+                  alt="Mozoter s8 earbud" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Mozoter s8 earbud</h3>
+                <div class="price">
+                  <span class="old-price">₦22,990</span>
+                  <span class="new-price">₦13,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product B -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Dell-XPS-13-ultrabook.jpg"
+                  alt="Dell XPS 13 ultrabook" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Dell XPS 13 ultrabook</h3>
+                <div class="price">
+                  <span class="old-price">₦39,990</span>
+                  <span class="new-price">₦230,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product C -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/samsung galaxy ultra watch.jpg"
+                  alt="Samsung galaxy ultra watch" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Samsung galaxy ultra watch</h3>
+                <div class="price">
+                  <span class="old-price">₦39,990</span>
+                  <span class="new-price">₦96,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product D -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Redmi note 14 pro.webp"
+                  alt="Redmi note 14 pro" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Redmi note 14 pro</h3>
+                <div class="price">
+                  <span class="old-price">₦29,990</span>
+                  <span class="new-price">₦160,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        Best Sell in this Week
+        Top-selling products with hover action icons.
+      -->
+      <section class="best-sell" id="bestSell">
+        <div class="container">
+          <div class="section-header">
+            <h2>Best Sell in this Week</h2>
+            <a href="#" class="view-all">View All</a>
+          </div>
+
+          <div class="products-grid best-grid">
+            <!-- Product 1 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Dell-Alienware.png"
+                  alt="Dell Alienware" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Dell Alienware</h3>
+                <div class="price">
+                  <span class="old-price">₦14,990</span>
+                  <span class="new-price">₦2,000,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/apple-watch-series-10.png"
+                  alt="Apple watch series 10" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Apple watch series 10</h3>
+                <div class="price">
+                  <span class="old-price">₦30,990</span>
+                  <span class="new-price">₦100,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/hp pro book core i5.jpg"
+                  alt="Hp pro book core i5" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Hp pro book core i5</h3>
+                <div class="price">
+                  <span class="old-price">₦20,990</span>
+                  <span class="new-price">₦1,300,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/ps4 controller.webp"
+                  alt="Ps4 controller" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Ps4 controller</h3>
+                <div class="price">
+                  <span class="old-price">₦19,990</span>
+                  <span class="new-price">₦60,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        Dual Style Background Section
+        Two background images left/right with promo blocks.
+      -->
+      <section class="style-offers" id="styleOffers">
+        <div class="container">
+          <div class="style-grid">
+            <div class="style-card-one">
+              <span class="style-tag">NEW STYLE</span>
+              <h2>Get 65% Offer & Make New Fusion.</h2>
+              <a href="#" class="style-btn">Shop Now ➝</a>
+            </div>
+            <div class="style-card">
+              <span class="style-tag">Mega OFFER</span>
+              <h2>
+                Make your New Styles <br />
+                with Our Products
+              </h2>
+              <a href="#" class="style-btn">Shop Now ➝</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="top-selling" id="topSelling">
+        <div class="container">
+          <div class="section-header">
+            <h2>Top Selling Products</h2>
+            <a href="#" class="view-all">View All</a>
+          </div>
+          <div class="products-grid top-grid">
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/mozoter s8 earbud.webp"
+                  alt="Mozoter s8 earbud" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Mozoter s8 earbud</h3>
+                <div class="price">
+                  <span class="old-price">₦22,990</span>
+                  <span class="new-price">₦13,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Dell-XPS-13-ultrabook.jpg"
+                  alt="Dell XPS 13 ultrabook" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Dell XPS 13 ultrabook</h3>
+                <div class="price">
+                  <span class="old-price">₦39,990</span>
+                  <span class="new-price">₦230,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/samsung galaxy ultra watch.jpg"
+                  alt="Samsung galaxy ultra watch" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Samsung galaxy ultra watch</h3>
+                <div class="price">
+                  <span class="old-price">₦39,990</span>
+                  <span class="new-price">₦96,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Redmi note 14 pro.webp"
+                  alt="Redmi note 14 pro" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Redmi note 14 pro</h3>
+                <div class="price">
+                  <span class="old-price">₦29,990</span>
+                  <span class="new-price">₦160,000</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/Dell-Alienware.png"
+                  alt="Dell Alienware" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Dell Alienware</h3>
+                <div class="price">
+                  <span class="old-price">₦14,990</span>
+                  <span class="new-price">₦2,000,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/apple-watch-series-10.png"
+                  alt="Apple watch series 10" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Apple watch series 10</h3>
+                <div class="price">
+                  <span class="old-price">₦30,990</span>
+                  <span class="new-price">₦100,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/hp pro book core i5.jpg"
+                  alt="Hp pro book core i5" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Hp pro book core i5</h3>
+                <div class="price">
+                  <span class="old-price">₦20,990</span>
+                  <span class="new-price">₦1,300,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/ps4 controller.webp"
+                  alt="Ps4 controller" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Ps4 controller</h3>
+                <div class="price">
+                  <span class="old-price">₦19,990</span>
+                  <span class="new-price">₦60,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/iphone 17 air new arrival.jpg"
+                  alt="Iphone 17 Air" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Iphone 17 Air</h3>
+                <div class="price">
+                  <span class="old-price">₦19,990</span>
+                  <span class="new-price">₦130,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/magnetic fast charger new arrival.jpg"
+                  alt="Magnetic fast charger" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Magnetic fast charger</h3>
+                <div class="price">
+                  <span class="old-price">₦5,990</span>
+                  <span class="new-price">₦9,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/iphone pouch new arrival.jpg"
+                  alt="Iphone pouch" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Iphone pouch</h3>
+                <div class="price">
+                  <span class="old-price">₦18,990</span>
+                  <span class="new-price">₦5,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-img">
+                <img
+                  src="../images/homepage-one/product-img/blender new arrival.jpg"
+                  alt="Blender" />
+                <div class="product-actions">
+                  <button title="View Details">⤢</button>
+                  <button title="Wishlist">♡</button>
+                  <button title="Compare">⇄</button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="rating">★★★★★</div>
+                <h3>Blender</h3>
+                <div class="price">
+                  <span class="old-price">₦9,990</span>
+                  <span class="new-price">₦30,990</span>
+                </div>
+                <button class="add-to-cart">Add To Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-benefits">
+          <div class="benefit">
+            <div class="icon">🚚</div>
+            <div class="text">
+              <div class="title">Free Shipping</div>
+              <div class="desc">When ordering over $100</div>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="icon">↩️</div>
+            <div class="text">
+              <div class="title">Free Return</div>
+              <div class="desc">Get Return within 30 days</div>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="icon">🔒</div>
+            <div class="text">
+              <div class="title">Secure Payment</div>
+              <div class="desc">100% Secure Online Payment</div>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="icon">🏆</div>
+            <div class="text">
+              <div class="title">Best Quality</div>
+              <div class="desc">Original Product Guaranteed</div>
+            </div>
+          </div>
+        </div>
+        <div class="footer-main">
+          <div class="footer-brand">
+            <div class="brand-row">
+              <img
+                src="../images/logos/Royal smart logo.jpg"
+                alt="Royal logo" />
+              <span>Royal smart technologies</span>
+            </div>
+            <ul class="footer-links">
+              <li><a href="#">Track Order</a></li>
+              <li><a href="#">Delivery & Returns</a></li>
+              <li><a href="#">Warranty</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>About Us</h4>
+            <ul class="footer-links">
+              <li><a href="#">Rave's Story</a></li>
+              <li><a href="#">Work With Us</a></li>
+              <li><a href="#">Corporate News</a></li>
+              <li><a href="#">Investors</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Useful Links</h4>
+            <ul class="footer-links">
+              <li><a href="#">Secure Payment</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Use</a></li>
+              <li><a href="#">Archived Products</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Contact Info</h4>
+            <div class="contact-item">
+              <div class="contact-label">Address:</div>
+              <div class="contact-value">
+                64 new heaven market road GSM village Enugu<br />
+                OR Shop 23 Mabel Plaza Onuato Presidential road Enugu
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-label">Phone:</div>
+              <div class="contact-value">
+                08036634053 || 07017103954<br />
+                09048393201 || 07065756892
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <div class="copyright">© Royal smart technologies</div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
