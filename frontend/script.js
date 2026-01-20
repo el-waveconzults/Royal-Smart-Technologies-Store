@@ -318,3 +318,63 @@ if (topSellingSection) {
   );
   productObserver.observe(topSellingSection);
 }
+
+if (document.body.classList.contains("about-page")) {
+  const scoreEl = document.querySelector(".big-score .score");
+  const basedEl = document.querySelector(".big-score .based-on");
+  if (scoreEl && basedEl) {
+    let score = 4.9;
+    let dir = 1;
+    let reviews = 5000;
+    const loop = () => {
+      score += 0.01 * dir;
+      if (score >= 5.0) dir = -1;
+      if (score <= 4.7) dir = 1;
+      scoreEl.textContent = score.toFixed(1);
+      reviews++;
+      if (reviews > 9999) reviews = 5000;
+      basedEl.textContent =
+        "Based on " + reviews.toLocaleString() + "+ reviews";
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }
+}
+
+if (document.body.classList.contains("shop-list-page")) {
+  const grid = document.querySelector(".products-grid");
+  if (grid) {
+    const cards = grid.querySelectorAll(".product-card");
+    cards.forEach((card, index) => {
+      setTimeout(() => card.classList.add("visible"), index * 100);
+    });
+  }
+}
+if (document.body.classList.contains("faq-page")) {
+  const list = document.querySelector(".faq-list");
+  if (list) {
+    const sync = () => {
+      document.querySelectorAll(".faq-item").forEach((item) => {
+        const t = item.querySelector(".faq-toggle");
+        if (t) t.textContent = item.classList.contains("open") ? "−" : "+";
+      });
+    };
+    sync();
+    list.addEventListener("click", (e) => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      const targetToggle = t.closest(".faq-toggle");
+      const targetQuestion = t.closest(".faq-question");
+      if (!targetToggle && !targetQuestion) return;
+      e.preventDefault();
+      const item = t.closest(".faq-item");
+      if (!item) return;
+      const opened = item.classList.contains("open");
+      document
+        .querySelectorAll(".faq-item.open")
+        .forEach((el) => el.classList.remove("open"));
+      if (!opened) item.classList.add("open");
+      sync();
+    });
+  }
+}
