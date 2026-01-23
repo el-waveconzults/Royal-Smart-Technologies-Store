@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../backend/db.php';
 $pdo = db();
+$sessionId = session_id();
 function getProductById(PDO $pdo, int $id): ?array {
   $stmt = $pdo->prepare("SELECT id, name, price, image FROM products WHERE id = ?");
   $stmt->execute([$id]);
@@ -35,19 +36,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
             'quantity' => 1,
           ];
           $_SESSION['cart_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO cart_items (session_id, product_id, quantity) VALUES (?, ?, 1)");
+          $stmt->execute([$sessionId, $productId]);
         }
       }
       $redirect = 'index.php';
     } elseif ($action === 'increment') {
       if (isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart'][$productId]['quantity']++;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity + 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'index.php?cart_open=1';
     } elseif ($action === 'decrement') {
       if (isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart'][$productId]['quantity']--;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity - 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
+        
         if ($_SESSION['cart'][$productId]['quantity'] <= 0) {
           unset($_SESSION['cart'][$productId]);
+          
+          // DB Sync Remove
+          $stmt = $pdo->prepare("DELETE FROM cart_items WHERE session_id = ? AND product_id = ?");
+          $stmt->execute([$sessionId, $productId]);
         }
       }
       $redirect = 'index.php?cart_open=1';
@@ -81,6 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['wish_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO wishlist (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $productId]);
         } else {
           $_SESSION['wish_message'] = 'Invalid product data';
         }
@@ -89,6 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['wishlist'][$productId])) {
         unset($_SESSION['wishlist'][$productId]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM wishlist WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'index.php?wish_open=1';
     }
@@ -122,6 +148,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['compare_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO compare (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $productId]);
         } else {
           $_SESSION['compare_message'] = 'Invalid product data';
         }
@@ -130,6 +160,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['compare'][$productId])) {
         unset($_SESSION['compare'][$productId]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM compare WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'index.php?compare_open=1';
     }
@@ -239,15 +273,15 @@ function renderGrid(array $items): string {
         </div>
         <ul class="nav-links">
           <li><a href="index.php">Home</a></li>
-          <li>
-            <a href="#">Shop ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Shop ▾</a>
             <ul class="dropdown">
               <li><a href="shop-list-view.php">Shop List View</a></li>
               <li><a href="shop-product-details.php">Shop Product-details</a></li>
             </ul>
           </li>
-          <li>
-            <a href="#">Pages ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Pages ▾</a>
             <ul class="dropdown">
               <li><a href="blog.php">Blog</a></li>
               <li><a href="faq.php">FAQ</a></li>
@@ -474,8 +508,8 @@ function renderGrid(array $items): string {
       <section class="style-offers" id="styleOffers">
         <div class="container">
           <div class="style-grid">
-            <div class="style-card-one"><span class="style-tag">NEW STYLE</span><h2>Get 65% Offer & Make New Fusion.</h2><a href="#" class="style-btn">Shop Now ➝</a></div>
-            <div class="style-card"><span class="style-tag">Mega OFFER</span><h2>Make your New Styles <br />with Our Products</h2><a href="#" class="style-btn">Shop Now ➝</a></div>
+            <div class="style-card-one"><span class="style-tag">NEW STYLE</span><h2>Get 65% Offer & Make New Fusion.</h2><a href="shop-list-view.php" class="style-btn">Shop Now ➝</a></div>
+            <div class="style-card"><span class="style-tag">Mega OFFER</span><h2>Make your New Styles <br />with Our Products</h2><a href="shop-list-view.php" class="style-btn">Shop Now ➝</a></div>
           </div>
         </div>
       </section>

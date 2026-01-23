@@ -2,20 +2,26 @@
 session_start();
 require_once __DIR__ . '/../backend/db.php';
 $pdo = db();
+$sessionId = session_id();
+
 function getProductById(PDO $pdo, int $id): ?array {
   $stmt = $pdo->prepare("SELECT id, name, price, image FROM products WHERE id = ?");
   $stmt->execute([$id]);
   $row = $stmt->fetch();
   return $row ?: null;
 }
+
+// --- CART HANDLER ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
   $action = $_POST['cart_action'];
   $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
   $redirect = 'shop-list-view.php';
+  
   if ($productId > 0) {
     if (!isset($_SESSION['cart'])) {
       $_SESSION['cart'] = [];
     }
+    
     if ($action === 'add') {
       if (isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart_message'] = 'Item already exists in the cart';
@@ -30,19 +36,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
             'quantity' => 1,
           ];
           $_SESSION['cart_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO cart_items (session_id, product_id, quantity) VALUES (?, ?, 1)");
+          $stmt->execute([$sessionId, $productId]);
         }
       }
       $redirect = 'shop-list-view.php';
     } elseif ($action === 'increment') {
       if (isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart'][$productId]['quantity']++;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity + 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'shop-list-view.php?cart_open=1';
     } elseif ($action === 'decrement') {
       if (isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart'][$productId]['quantity']--;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity - 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
+        
         if ($_SESSION['cart'][$productId]['quantity'] <= 0) {
           unset($_SESSION['cart'][$productId]);
+          
+          // DB Sync Remove
+          $stmt = $pdo->prepare("DELETE FROM cart_items WHERE session_id = ? AND product_id = ?");
+          $stmt->execute([$sessionId, $productId]);
         }
       }
       $redirect = 'shop-list-view.php?cart_open=1';
@@ -51,15 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
   header('Location: '.$redirect);
   exit;
 }
+
+// --- WISHLIST HANDLER ---
 $wishMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
   $action = $_POST['wish_action'];
   $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
   $redirect = 'shop-list-view.php';
+  
   if ($productId > 0) {
     if (!isset($_SESSION['wishlist'])) {
       $_SESSION['wishlist'] = [];
     }
+    
     if ($action === 'add') {
       if (isset($_SESSION['wishlist'][$productId])) {
         $_SESSION['wish_message'] = 'Item already exists in the wishlist';
@@ -68,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
         $price = isset($_POST['product_price']) ? (float)$_POST['product_price'] : 0.0;
         $image = isset($_POST['product_image']) ? trim((string)$_POST['product_image']) : '';
         $dbId = isset($_POST['product_db_id']) ? (int)$_POST['product_db_id'] : 0;
+        
         if ($name !== '' && $price > 0 && $image !== '') {
           $_SESSION['wishlist'][$productId] = [
             'id' => $productId,
@@ -77,6 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['wish_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO wishlist (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $productId]);
         } else {
           $_SESSION['wish_message'] = 'Invalid product data';
         }
@@ -85,6 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['wishlist'][$productId])) {
         unset($_SESSION['wishlist'][$productId]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM wishlist WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'shop-list-view.php?wish_open=1';
     }
@@ -92,15 +128,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
   header('Location: '.$redirect);
   exit;
 }
+
+// --- COMPARE HANDLER ---
 $compareMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
   $action = $_POST['compare_action'];
   $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
   $redirect = 'shop-list-view.php';
+  
   if ($productId > 0) {
     if (!isset($_SESSION['compare'])) {
       $_SESSION['compare'] = [];
     }
+    
     if ($action === 'add') {
       if (isset($_SESSION['compare'][$productId])) {
         $_SESSION['compare_message'] = 'Item already exists in compare';
@@ -109,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
         $price = isset($_POST['product_price']) ? (float)$_POST['product_price'] : 0.0;
         $image = isset($_POST['product_image']) ? trim((string)$_POST['product_image']) : '';
         $dbId = isset($_POST['product_db_id']) ? (int)$_POST['product_db_id'] : 0;
+        
         if ($name !== '' && $price > 0 && $image !== '') {
           $_SESSION['compare'][$productId] = [
             'id' => $productId,
@@ -118,6 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['compare_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO compare (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $productId]);
         } else {
           $_SESSION['compare_message'] = 'Invalid product data';
         }
@@ -126,6 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['compare'][$productId])) {
         unset($_SESSION['compare'][$productId]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM compare WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $productId]);
       }
       $redirect = 'shop-list-view.php?compare_open=1';
     }
@@ -133,6 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
   header('Location: '.$redirect);
   exit;
 }
+
+// --- VIEW DATA PREP ---
 $cart = $_SESSION['cart'] ?? [];
 $cartCount = 0;
 $cartTotal = 0.0;
@@ -143,16 +194,30 @@ foreach ($cart as $item) {
 $cartMessage = $_SESSION['cart_message'] ?? '';
 unset($_SESSION['cart_message']);
 $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
+
 $wish = $_SESSION['wishlist'] ?? [];
 $wishCount = count($wish);
 $wishMessage = $_SESSION['wish_message'] ?? '';
 unset($_SESSION['wish_message']);
 $wishOpen = isset($_GET['wish_open']) && $_GET['wish_open'] === '1';
+
 $compare = $_SESSION['compare'] ?? [];
 $compareCount = count($compare);
 $compareMessage = $_SESSION['compare_message'] ?? '';
 unset($_SESSION['compare_message']);
 $compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
+
+// Fetch products for "Shop list view" category
+$stmtCat = $pdo->prepare("SELECT id FROM categories WHERE slug = 'shop_list_view'");
+$stmtCat->execute();
+$catId = $stmtCat->fetchColumn();
+
+$products = [];
+if ($catId) {
+    $stmtProd = $pdo->prepare("SELECT * FROM products WHERE category_id = ? ORDER BY id DESC");
+    $stmtProd->execute([$catId]);
+    $products = $stmtProd->fetchAll();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -219,15 +284,15 @@ $compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
         </div>
         <ul class="nav-links">
           <li><a href="index.php">Home</a></li>
-          <li>
-            <a href="#">Shop ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Shop ▾</a>
             <ul class="dropdown">
               <li><a href="shop-list-view.php" aria-current="page">Shop List View</a></li>
               <li><a href="shop-product-details.php">Shop Product-details</a></li>
             </ul>
           </li>
-          <li>
-            <a href="#">Pages ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Pages ▾</a>
             <ul class="dropdown">
               <li><a href="blog.php">Blog</a></li>
               <li><a href="faq.php">FAQ</a></li>
@@ -362,474 +427,60 @@ $compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
       <section class="shop-list" id="shopList">
         <div class="container">
           <div class="products-grid">
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/Apple-iPhone-17-Pro-Max-1766416328.webp" alt="Apple iPhone 17 Pro Max" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=1" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="101" />
-                    <input type="hidden" name="product_db_id" value="1" />
-                    <input type="hidden" name="product_name" value="Apple iPhone 17 Pro Max" />
-                    <input type="hidden" name="product_price" value="1250000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Apple-iPhone-17-Pro-Max-1766416328.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="101" />
-                    <input type="hidden" name="product_db_id" value="1" />
-                    <input type="hidden" name="product_name" value="Apple iPhone 17 Pro Max" />
-                    <input type="hidden" name="product_price" value="1250000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Apple-iPhone-17-Pro-Max-1766416328.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
+            <?php if (empty($products)): ?>
+              <p>No products found in "Shop list view" category. Please add products from Admin Dashboard.</p>
+            <?php else: ?>
+              <?php foreach ($products as $p): ?>
+                <?php
+                  $pId = (int)$p['id'];
+                  $pName = htmlspecialchars($p['name']);
+                  $pPrice = (float)$p['price'];
+                  $pOrig = $p['original_price'] ? (float)$p['original_price'] : null;
+                  $pImage = htmlspecialchars($p['image']);
+                ?>
+                <div class="product-card">
+                  <div class="product-img">
+                    <img src="<?= $pImage ?>" alt="<?= $pName ?>" />
+                    <div class="product-actions">
+                      <a href="shop-product-details.php?id=<?= $pId ?>" title="View Details">⤢</a>
+                      <form method="post">
+                        <input type="hidden" name="wish_action" value="add" />
+                        <input type="hidden" name="product_id" value="<?= $pId ?>" />
+                        <input type="hidden" name="product_db_id" value="<?= $pId ?>" />
+                        <input type="hidden" name="product_name" value="<?= $pName ?>" />
+                        <input type="hidden" name="product_price" value="<?= $pPrice ?>" />
+                        <input type="hidden" name="product_image" value="<?= $pImage ?>" />
+                        <button title="Wishlist">♡</button>
+                      </form>
+                      <form method="post">
+                        <input type="hidden" name="compare_action" value="add" />
+                        <input type="hidden" name="product_id" value="<?= $pId ?>" />
+                        <input type="hidden" name="product_db_id" value="<?= $pId ?>" />
+                        <input type="hidden" name="product_name" value="<?= $pName ?>" />
+                        <input type="hidden" name="product_price" value="<?= $pPrice ?>" />
+                        <input type="hidden" name="product_image" value="<?= $pImage ?>" />
+                        <button title="Compare">⇄</button>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="product-info">
+                    <div class="rating">★★★★★</div>
+                    <h3><?= $pName ?></h3>
+                    <div class="price">
+                      <?php if ($pOrig): ?>
+                        <span class="old-price">₦<?= number_format($pOrig) ?></span>
+                      <?php endif; ?>
+                      <span class="new-price">₦<?= number_format($pPrice) ?></span>
+                    </div>
+                    <form method="post">
+                      <input type="hidden" name="cart_action" value="add" />
+                      <input type="hidden" name="product_id" value="<?= $pId ?>" />
+                      <button type="submit" class="add-to-cart">Add To Cart</button>
+                    </form>
+                  </div>
                 </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Apple iPhone 17 Pro Max</h3>
-                <div class="price">
-                  <span class="old-price">₦1,350,000</span>
-                  <span class="new-price">₦1,250,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="1" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/Dell-XPS-13-ultrabook.jpg" alt="Dell XPS 13 Ultrabook" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=2" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="102" />
-                    <input type="hidden" name="product_db_id" value="2" />
-                    <input type="hidden" name="product_name" value="Dell XPS 13 Ultrabook" />
-                    <input type="hidden" name="product_price" value="950000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Dell-XPS-13-ultrabook.jpg" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="102" />
-                    <input type="hidden" name="product_db_id" value="2" />
-                    <input type="hidden" name="product_name" value="Dell XPS 13 Ultrabook" />
-                    <input type="hidden" name="product_price" value="950000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Dell-XPS-13-ultrabook.jpg" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Dell XPS 13 Ultrabook</h3>
-                <div class="price">
-                  <span class="old-price">₦1,050,000</span>
-                  <span class="new-price">₦950,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="2" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/BeatsStudioBuds.webp" alt="Beats Studio Buds" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=3" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="103" />
-                    <input type="hidden" name="product_db_id" value="3" />
-                    <input type="hidden" name="product_name" value="Beats Studio Buds" />
-                    <input type="hidden" name="product_price" value="95000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/BeatsStudioBuds.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="103" />
-                    <input type="hidden" name="product_db_id" value="3" />
-                    <input type="hidden" name="product_name" value="Beats Studio Buds" />
-                    <input type="hidden" name="product_price" value="95000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/BeatsStudioBuds.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Beats Studio Buds</h3>
-                <div class="price">
-                  <span class="old-price">₦105,000</span>
-                  <span class="new-price">₦95,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="3" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/Samsung Galaxy_S22_Ultra.jpg" alt="Samsung Galaxy S22 Ultra" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=4" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="104" />
-                    <input type="hidden" name="product_db_id" value="4" />
-                    <input type="hidden" name="product_name" value="Samsung Galaxy S22 Ultra" />
-                    <input type="hidden" name="product_price" value="890000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Samsung Galaxy_S22_Ultra.jpg" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="104" />
-                    <input type="hidden" name="product_db_id" value="4" />
-                    <input type="hidden" name="product_name" value="Samsung Galaxy S22 Ultra" />
-                    <input type="hidden" name="product_price" value="890000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Samsung Galaxy_S22_Ultra.jpg" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Samsung Galaxy S22 Ultra</h3>
-                <div class="price">
-                  <span class="old-price">₦980,000</span>
-                  <span class="new-price">₦890,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="4" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/oppo-reno-10-pro.webp" alt="OPPO Reno 10 Pro" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=5" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="105" />
-                    <input type="hidden" name="product_db_id" value="5" />
-                    <input type="hidden" name="product_name" value="OPPO Reno 10 Pro" />
-                    <input type="hidden" name="product_price" value="480000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/oppo-reno-10-pro.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="105" />
-                    <input type="hidden" name="product_db_id" value="5" />
-                    <input type="hidden" name="product_name" value="OPPO Reno 10 Pro" />
-                    <input type="hidden" name="product_price" value="480000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/oppo-reno-10-pro.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★☆</div>
-                <h3>OPPO Reno 10 Pro</h3>
-                <div class="price">
-                  <span class="old-price">₦520,000</span>
-                  <span class="new-price">₦480,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="5" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/magnetic fast charger new arrival.jpg" alt="Magnetic Fast Charger" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=6" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="106" />
-                    <input type="hidden" name="product_db_id" value="6" />
-                    <input type="hidden" name="product_name" value="Magnetic Fast Charger" />
-                    <input type="hidden" name="product_price" value="28500" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/magnetic fast charger new arrival.jpg" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="106" />
-                    <input type="hidden" name="product_db_id" value="6" />
-                    <input type="hidden" name="product_name" value="Magnetic Fast Charger" />
-                    <input type="hidden" name="product_price" value="28500" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/magnetic fast charger new arrival.jpg" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Magnetic Fast Charger</h3>
-                <div class="price">
-                  <span class="old-price">₦32,000</span>
-                  <span class="new-price">₦28,500</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="6" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/Creative-Wireless-Bone-Conduction-Headphones-with-Bluetooth-5_3-11.webp" alt="Bone Conduction Headphones" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=7" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="107" />
-                    <input type="hidden" name="product_db_id" value="7" />
-                    <input type="hidden" name="product_name" value="Bone Conduction Headphones" />
-                    <input type="hidden" name="product_price" value="55000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Creative-Wireless-Bone-Conduction-Headphones-with-Bluetooth-5_3-11.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="107" />
-                    <input type="hidden" name="product_db_id" value="7" />
-                    <input type="hidden" name="product_name" value="Bone Conduction Headphones" />
-                    <input type="hidden" name="product_price" value="55000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Creative-Wireless-Bone-Conduction-Headphones-with-Bluetooth-5_3-11.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★☆</div>
-                <h3>Bone Conduction Headphones</h3>
-                <div class="price">
-                  <span class="old-price">₦60,000</span>
-                  <span class="new-price">₦55,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="7" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/ps4 controller.webp" alt="DualShock PS4 Controller" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=8" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="108" />
-                    <input type="hidden" name="product_db_id" value="8" />
-                    <input type="hidden" name="product_name" value="DualShock PS4 Controller" />
-                    <input type="hidden" name="product_price" value="36000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/ps4 controller.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="108" />
-                    <input type="hidden" name="product_db_id" value="8" />
-                    <input type="hidden" name="product_name" value="DualShock PS4 Controller" />
-                    <input type="hidden" name="product_price" value="36000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/ps4 controller.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>DualShock PS4 Controller</h3>
-                <div class="price">
-                  <span class="old-price">₦40,000</span>
-                  <span class="new-price">₦36,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="8" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/bluetooth-headphones-1766416865.webp" alt="Bluetooth Headphones" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=9" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="109" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Bluetooth Headphones" />
-                    <input type="hidden" name="product_price" value="60000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/bluetooth-headphones-1766416865.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="109" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Bluetooth Headphones" />
-                    <input type="hidden" name="product_price" value="60000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/bluetooth-headphones-1766416865.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★☆</div>
-                <h3>Bluetooth Headphones</h3>
-                <div class="price">
-                  <span class="old-price">₦65,000</span>
-                  <span class="new-price">₦60,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="9" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/samsung galaxy z fold 6.jpg" alt="Samsung Galaxy Z Fold 6" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=10" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="110" />
-                    <input type="hidden" name="product_db_id" value="10" />
-                    <input type="hidden" name="product_name" value="Samsung Galaxy Z Fold 6" />
-                    <input type="hidden" name="product_price" value="1350000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/samsung galaxy z fold 6.jpg" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="110" />
-                    <input type="hidden" name="product_db_id" value="10" />
-                    <input type="hidden" name="product_name" value="Samsung Galaxy Z Fold 6" />
-                    <input type="hidden" name="product_price" value="1350000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/samsung galaxy z fold 6.jpg" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★★</div>
-                <h3>Samsung Galaxy Z Fold 6</h3>
-                <div class="price">
-                  <span class="old-price">₦1,450,000</span>
-                  <span class="new-price">₦1,350,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="10" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/Apple_Watch_Ultra_3_Titanium_Black.webp" alt="Bluetooth Headphones" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=9" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="111" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Apple watch ultra 3" />
-                    <input type="hidden" name="product_price" value="80000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Apple_Watch_Ultra_3_Titanium_Black.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="111" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Apple watch ultra 3" />
-                    <input type="hidden" name="product_price" value="80000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/Apple_Watch_Ultra_3_Titanium_Black.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★☆</div>
-                <h3>Apple watch ultra 3</h3>
-                <div class="price">
-                  <span class="old-price">₦100,000</span>
-                  <span class="new-price">₦80,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="9" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
-            <div class="product-card">
-              <div class="product-img">
-                <img src="../images/homepage-one/product-img/call-of-duty-modern-warfare-ps4.webp" alt="Bluetooth Headphones" />
-                <div class="product-actions">
-                  <a href="shop-product-details.php?id=9" title="View Details">⤢</a>
-                  <form method="post">
-                    <input type="hidden" name="wish_action" value="add" />
-                    <input type="hidden" name="product_id" value="112" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Call of duty" />
-                    <input type="hidden" name="product_price" value="40000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/call-of-duty-modern-warfare-ps4.webp" />
-                    <button title="Wishlist">♡</button>
-                  </form>
-                  <form method="post">
-                    <input type="hidden" name="compare_action" value="add" />
-                    <input type="hidden" name="product_id" value="112" />
-                    <input type="hidden" name="product_db_id" value="9" />
-                    <input type="hidden" name="product_name" value="Call of duty" />
-                    <input type="hidden" name="product_price" value="40000" />
-                    <input type="hidden" name="product_image" value="../images/homepage-one/product-img/call-of-duty-modern-warfare-ps4.webp" />
-                    <button title="Compare">⇄</button>
-                  </form>
-                </div>
-              </div>
-              <div class="product-info">
-                <div class="rating">★★★★☆</div>
-                <h3>Call of duty</h3>
-                <div class="price">
-                  <span class="old-price">₦50,000</span>
-                  <span class="new-price">₦40,000</span>
-                </div>
-                <form method="post">
-                  <input type="hidden" name="cart_action" value="add" />
-                  <input type="hidden" name="product_id" value="9" />
-                  <button type="submit" class="add-to-cart">Add To Cart</button>
-                </form>
-              </div>
-            </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </div>
       </section>
@@ -849,11 +500,14 @@ $compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
           </div>
           <div class="footer-col"><h4>About Us</h4><ul class="footer-links"><li><a href="#">Rave's Story</a></li><li><a href="#">Work With Us</a></li><li><a href="#">Corporate News</a></li><li><a href="#">Investors</a></li></ul></div>
           <div class="footer-col"><h4>Useful Links</h4><ul class="footer-links"><li><a href="#">Secure Payment</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Archived Products</a></li></ul></div>
-          <div class="footer-col"><h4>Contact Info</h4><div class="contact-item"><div class="contact-label">Address:</div><div class="contact-value">64 new heaven market road GSM village Enugu<br />OR Shop 23 Mabel Plaza Onuato Presidential road Enugu</div></div><div class="contact-item"><div class="contact-label">Phone:</div><div class="contact-value">08036634053 || 07017103954<br />09048393201 || 07065756892</div></div></div>
+          <div class="footer-col"><h4>Contact Info</h4><ul class="footer-links"><li><span>Address:</span> 4517 Washington Ave. Manchester, Kentucky 39495</li><li><span>Phone:</span> +880171889547</li><li><span>Email:</span> Demo@gmail.com</li></ul></div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2024 Royal Smart Technologies. All Rights Reserved</p>
+          <div class="payment-icons"><img src="../images/logos/payment-img-1.png" alt="Payment" /></div>
         </div>
       </div>
-      <div class="footer-bottom"><div class="container"><div class="copyright">© Royal smart technologies</div></div></div>
     </footer>
-    <script src="script.js?v=20260119"></script>
+    <script src="script.js"></script>
   </body>
 </html>

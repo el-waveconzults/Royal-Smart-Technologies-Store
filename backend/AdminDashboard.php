@@ -1,4 +1,13 @@
-<?php require_once __DIR__.'/auth.php'; require_admin(); ?>
+<?php
+require_once __DIR__.'/auth.php';
+require_admin();
+require_once __DIR__.'/db.php';
+$pdo = db();
+
+// Count active cart items for the badge
+$stmt = $pdo->query("SELECT COUNT(*) FROM cart_items");
+$cartCount = $stmt->fetchColumn();
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -31,12 +40,13 @@
           <a href="products.php">  <li>Tables</li> </a>
           <a href="products.php"> <li>Edit</li> </a>
           <a href="products.php"> <li>Delete <span class="badge">1</span></li> </a>
-          <li>UI Elements</li>
-          <li>Forms</li>
+          <a href="admin_wishlist.php"> <li>Wishlist</li> </a>
+          <a href="admin_compare.php"> <li>Compare</li> </a>
+          <a href="admin_orders.php"> <li>Orders <span class="badge" style="background:var(--red);border-radius:3px;"><?= $cartCount ?></span></li> </a>
           <li>Charts</li>
         <li>E-Commerce <span class="hot">Hot</span></li>
-         <li>Apps</li>
-          <li>Maps</li>
+         <li>Forms</li>
+          <li>Blog</li>
           <li>Special Pages</li>
           <li>Documentation</li>
           <li>Multilevel</li>

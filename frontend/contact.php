@@ -50,6 +50,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
   header('Location: '.$redirect);
   exit;
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
+  $action = $_POST['wish_action'];
+  $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
+  $redirect = 'contact.php';
+  if ($productId > 0) {
+    if (!isset($_SESSION['wishlist'])) {
+      $_SESSION['wishlist'] = [];
+    }
+    if ($action === 'add') {
+      if (isset($_SESSION['wishlist'][$productId])) {
+        $_SESSION['wish_message'] = 'Item already exists in the wishlist';
+      } else {
+        $name = isset($_POST['product_name']) ? trim((string)$_POST['product_name']) : '';
+        $price = isset($_POST['product_price']) ? (float)$_POST['product_price'] : 0.0;
+        $image = isset($_POST['product_image']) ? trim((string)$_POST['product_image']) : '';
+        $dbId = isset($_POST['product_db_id']) ? (int)$_POST['product_db_id'] : 0;
+        if ($name !== '' && $price > 0 && $image !== '') {
+          $_SESSION['wishlist'][$productId] = [
+            'id' => $productId,
+            'name' => $name,
+            'price' => $price,
+            'image' => $image,
+            'db_id' => $dbId,
+          ];
+          $_SESSION['wish_message'] = '';
+        } else {
+          $_SESSION['wish_message'] = 'Invalid product data';
+        }
+      }
+      $redirect = 'contact.php';
+    } elseif ($action === 'remove') {
+      if (isset($_SESSION['wishlist'][$productId])) {
+        unset($_SESSION['wishlist'][$productId]);
+      }
+      $redirect = 'contact.php?wish_open=1';
+    }
+  }
+  header('Location: '.$redirect);
+  exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
+  $action = $_POST['compare_action'];
+  $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
+  $redirect = 'contact.php';
+  if ($productId > 0) {
+    if (!isset($_SESSION['compare'])) {
+      $_SESSION['compare'] = [];
+    }
+    if ($action === 'add') {
+      if (isset($_SESSION['compare'][$productId])) {
+         $_SESSION['compare_message'] = 'Item already exists in compare';
+      }
+    } elseif ($action === 'remove') {
+      if (isset($_SESSION['compare'][$productId])) {
+        unset($_SESSION['compare'][$productId]);
+      }
+      $redirect = 'contact.php?compare_open=1';
+    }
+  }
+  header('Location: '.$redirect);
+  exit;
+}
 $cart = $_SESSION['cart'] ?? [];
 $cartCount = 0;
 $cartTotal = 0.0;
@@ -60,6 +122,16 @@ foreach ($cart as $item) {
 $cartMessage = $_SESSION['cart_message'] ?? '';
 unset($_SESSION['cart_message']);
 $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
+$compare = $_SESSION['compare'] ?? [];
+$compareCount = count($compare);
+$compareMessage = $_SESSION['compare_message'] ?? '';
+unset($_SESSION['compare_message']);
+$compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
+$wish = $_SESSION['wishlist'] ?? [];
+$wishCount = count($wish);
+$wishMessage = $_SESSION['wish_message'] ?? '';
+unset($_SESSION['wish_message']);
+$wishOpen = isset($_GET['wish_open']) && $_GET['wish_open'] === '1';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -87,12 +159,18 @@ $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
           <button id="search-btn">Search</button>
         </div>
         <div class="icons">
-          <button class="icon-btn">♡</button>
+          <a href="contact.php?wish_open=1" class="icon-btn wish-button">
+            ♡
+            <span class="cart-badge"<?= $wishCount > 0 ? '' : ' hidden' ?>><?= $wishCount ?></span>
+          </a>
           <a href="contact.php?cart_open=1" class="icon-btn cart-button">
             🛒
             <span class="cart-badge"<?= $cartCount > 0 ? '' : ' hidden' ?>><?= $cartCount ?></span>
           </a>
-          <button class="icon-btn">⇄</button>
+          <a href="contact.php?compare_open=1" class="icon-btn compare-button">
+            ⇄
+            <span class="cart-badge"<?= $compareCount > 0 ? '' : ' hidden' ?>><?= $compareCount ?></span>
+          </a>
         </div>
       </div>
       <nav class="main-nav">
@@ -120,15 +198,15 @@ $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
         </div>
         <ul class="nav-links">
           <li><a href="index.php">Home</a></li>
-          <li>
-            <a href="#">Shop ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Shop ▾</a>
             <ul class="dropdown">
               <li><a href="shop-list-view.php">Shop List View</a></li>
               <li><a href="shop-product-details.php">Shop Product-details</a></li>
             </ul>
           </li>
-          <li>
-            <a href="#">Pages ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Pages ▾</a>
             <ul class="dropdown">
               <li><a href="blog.php">Blog</a></li>
               <li><a href="faq.php">FAQ</a></li>
@@ -139,6 +217,38 @@ $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
         </ul>
       </nav>
     </header>
+    <div class="cart-panel-overlay" id="compareOverlay"<?= $compareOpen ? '' : ' hidden' ?>>
+      <aside class="cart-panel" id="comparePanel">
+        <div class="cart-header">
+          <h2>Compare</h2>
+          <a class="cart-close" href="contact.php">×</a>
+        </div>
+        <div class="cart-message" id="compareMessage"><?= htmlspecialchars($compareMessage) ?></div>
+        <div class="cart-items" id="compareItems">
+          <?php if (!$compare): ?>
+            <p>No items to compare.</p>
+          <?php else: ?>
+            <?php foreach ($compare as $item): ?>
+              <div class="cart-item">
+                <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" />
+                <div class="cart-item-info">
+                  <div class="cart-item-title"><?= htmlspecialchars($item['name']) ?></div>
+                  <div class="cart-item-price">₦<?= number_format((float)$item['price']) ?></div>
+                </div>
+                <div class="cart-quantity">
+                  <a href="shop-product-details.php?id=<?= (int)($item['db_id'] ?? $item['id']) ?>">⤢</a>
+                  <form method="post">
+                    <input type="hidden" name="compare_action" value="remove" />
+                    <input type="hidden" name="product_id" value="<?= (int)$item['id'] ?>" />
+                    <button type="submit">×</button>
+                  </form>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </aside>
+    </div>
     <div class="cart-panel-overlay" id="cartOverlay"<?= $cartOpen ? '' : ' hidden' ?>>
       <aside class="cart-panel" id="cartPanel">
         <div class="cart-header">
@@ -180,6 +290,42 @@ $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
             <span>₦<span id="cartTotal"><?= number_format($cartTotal) ?></span></span>
           </div>
           <button class="cart-buy" id="cartBuy" type="button"<?= $cartCount > 0 ? '' : ' disabled' ?>>Buy Now</button>
+        </div>
+      </aside>
+    </div>
+    <div class="cart-panel-overlay" id="wishOverlay"<?= $wishOpen ? '' : ' hidden' ?>>
+      <aside class="cart-panel" id="wishPanel">
+        <div class="cart-header">
+          <h2>Your Wishlist</h2>
+          <a class="cart-close" href="contact.php">×</a>
+        </div>
+        <div class="cart-message" id="wishMessage"><?= htmlspecialchars($wishMessage) ?></div>
+        <div class="cart-items" id="wishItems">
+          <?php if (!$wish): ?>
+            <p>Your wishlist is empty.</p>
+          <?php else: ?>
+            <?php foreach ($wish as $item): ?>
+              <div class="cart-item">
+                <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" />
+                <div class="cart-item-info">
+                  <div class="cart-item-title"><?= htmlspecialchars($item['name']) ?></div>
+                  <div class="cart-item-price">₦<?= number_format((float)$item['price']) ?></div>
+                </div>
+                <div class="cart-quantity">
+                  <form method="post">
+                    <input type="hidden" name="wish_action" value="remove" />
+                    <input type="hidden" name="product_id" value="<?= (int)$item['id'] ?>" />
+                    <button type="submit">×</button>
+                  </form>
+                  <form method="post">
+                    <input type="hidden" name="cart_action" value="add" />
+                    <input type="hidden" name="product_id" value="<?= (int)($item['db_id'] ?? $item['id']) ?>" />
+                    <button type="submit">🛒</button>
+                  </form>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
       </aside>
     </div>

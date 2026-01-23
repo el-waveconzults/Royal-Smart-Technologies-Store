@@ -91,6 +91,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
   header('Location: '.$redirect);
   exit;
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
+  $action = $_POST['compare_action'];
+  $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
+  $redirect = 'faq.php';
+  if ($productId > 0) {
+    if (!isset($_SESSION['compare'])) {
+      $_SESSION['compare'] = [];
+    }
+    if ($action === 'add') {
+      if (isset($_SESSION['compare'][$productId])) {
+         $_SESSION['compare_message'] = 'Item already exists in compare';
+      }
+    } elseif ($action === 'remove') {
+      if (isset($_SESSION['compare'][$productId])) {
+        unset($_SESSION['compare'][$productId]);
+      }
+      $redirect = 'faq.php?compare_open=1';
+    }
+  }
+  header('Location: '.$redirect);
+  exit;
+}
 $cart = $_SESSION['cart'] ?? [];
 $cartCount = 0;
 $cartTotal = 0.0;
@@ -101,6 +123,11 @@ foreach ($cart as $item) {
 $cartMessage = $_SESSION['cart_message'] ?? '';
 unset($_SESSION['cart_message']);
 $cartOpen = isset($_GET['cart_open']) && $_GET['cart_open'] === '1';
+$compare = $_SESSION['compare'] ?? [];
+$compareCount = count($compare);
+$compareMessage = $_SESSION['compare_message'] ?? '';
+unset($_SESSION['compare_message']);
+$compareOpen = isset($_GET['compare_open']) && $_GET['compare_open'] === '1';
 $wish = $_SESSION['wishlist'] ?? [];
 $wishCount = count($wish);
 $wishMessage = $_SESSION['wish_message'] ?? '';
@@ -141,7 +168,10 @@ $wishOpen = isset($_GET['wish_open']) && $_GET['wish_open'] === '1';
             🛒
             <span class="cart-badge"<?= $cartCount > 0 ? '' : ' hidden' ?>><?= $cartCount ?></span>
           </a>
-          <button class="icon-btn">⇄</button>
+          <a href="faq.php?compare_open=1" class="icon-btn compare-button">
+            ⇄
+            <span class="cart-badge"<?= $compareCount > 0 ? '' : ' hidden' ?>><?= $compareCount ?></span>
+          </a>
         </div>
       </div>
       <nav class="main-nav">
@@ -169,15 +199,15 @@ $wishOpen = isset($_GET['wish_open']) && $_GET['wish_open'] === '1';
         </div>
         <ul class="nav-links">
           <li><a href="index.php">Home</a></li>
-          <li>
-            <a href="#">Shop ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Shop ▾</a>
             <ul class="dropdown">
               <li><a href="shop-list-view.php">Shop List View</a></li>
               <li><a href="shop-product-details.php">Shop Product-details</a></li>
             </ul>
           </li>
-          <li>
-            <a href="#">Pages ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Pages ▾</a>
             <ul class="dropdown">
               <li><a href="blog.php">Blog</a></li>
               <li><a href="faq.php" aria-current="page">FAQ</a></li>
@@ -188,6 +218,38 @@ $wishOpen = isset($_GET['wish_open']) && $_GET['wish_open'] === '1';
         </ul>
       </nav>
     </header>
+    <div class="cart-panel-overlay" id="compareOverlay"<?= $compareOpen ? '' : ' hidden' ?>>
+      <aside class="cart-panel" id="comparePanel">
+        <div class="cart-header">
+          <h2>Compare</h2>
+          <a class="cart-close" href="faq.php">×</a>
+        </div>
+        <div class="cart-message" id="compareMessage"><?= htmlspecialchars($compareMessage) ?></div>
+        <div class="cart-items" id="compareItems">
+          <?php if (!$compare): ?>
+            <p>No items to compare.</p>
+          <?php else: ?>
+            <?php foreach ($compare as $item): ?>
+              <div class="cart-item">
+                <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" />
+                <div class="cart-item-info">
+                  <div class="cart-item-title"><?= htmlspecialchars($item['name']) ?></div>
+                  <div class="cart-item-price">₦<?= number_format((float)$item['price']) ?></div>
+                </div>
+                <div class="cart-quantity">
+                  <a href="shop-product-details.php?id=<?= (int)($item['db_id'] ?? $item['id']) ?>">⤢</a>
+                  <form method="post">
+                    <input type="hidden" name="compare_action" value="remove" />
+                    <input type="hidden" name="product_id" value="<?= (int)$item['id'] ?>" />
+                    <button type="submit">×</button>
+                  </form>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </aside>
+    </div>
     <div class="cart-panel-overlay" id="cartOverlay"<?= $cartOpen ? '' : ' hidden' ?>>
       <aside class="cart-panel" id="cartPanel">
         <div class="cart-header">

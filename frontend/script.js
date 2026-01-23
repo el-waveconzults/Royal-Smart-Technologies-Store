@@ -37,6 +37,43 @@ if (toggle && panel) {
 }
 
 /**
+ * Dropdown Logic (Mobile)
+ * Handles click-to-toggle for dropdowns on touch devices where hover isn't reliable.
+ */
+const dropdownTriggers = document.querySelectorAll('.dropdown-trigger');
+dropdownTriggers.forEach(trigger => {
+  trigger.addEventListener('click', (e) => {
+    // Only apply toggle behavior on smaller screens if needed, 
+    // or generally if you want click-to-open everywhere.
+    // For now, let's toggle the dropdown visibility.
+    e.preventDefault();
+    const parent = trigger.closest('.dropdown-container');
+    const dropdown = parent.querySelector('.dropdown');
+    
+    // Close other open dropdowns
+    document.querySelectorAll('.dropdown-container .dropdown').forEach(d => {
+      if (d !== dropdown) d.style.display = 'none';
+    });
+
+    // Toggle current
+    if (dropdown.style.display === 'block') {
+      dropdown.style.display = 'none';
+    } else {
+      dropdown.style.display = 'block';
+    }
+  });
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.dropdown-container')) {
+    document.querySelectorAll('.dropdown-container .dropdown').forEach(d => {
+      d.style.display = 'none';
+    });
+  }
+});
+
+/**
  * Carousel Logic
  * Handles the auto-sliding hero banner and manual navigation.
  */

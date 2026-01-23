@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../backend/db.php';
 $pdo = db();
+$sessionId = session_id();
 function getProductById(PDO $pdo, int $id): ?array {
   $stmt = $pdo->prepare("SELECT id, name, price, original_price, image FROM products WHERE id = ?");
   $stmt->execute([$id]);
@@ -36,19 +37,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_action'])) {
             'quantity' => 1,
           ];
           $_SESSION['cart_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO cart_items (session_id, product_id, quantity) VALUES (?, ?, 1)");
+          $stmt->execute([$sessionId, $pid]);
         }
       }
       $redirect = 'shop-product-details.php?id=' . $pid;
     } elseif ($action === 'increment') {
       if (isset($_SESSION['cart'][$pid])) {
         $_SESSION['cart'][$pid]['quantity']++;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity + 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $pid]);
       }
       $redirect = 'shop-product-details.php?id=' . ($productId > 0 ? $productId : $pid) . '&cart_open=1';
     } elseif ($action === 'decrement') {
       if (isset($_SESSION['cart'][$pid])) {
         $_SESSION['cart'][$pid]['quantity']--;
+        
+        // DB Sync
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = quantity - 1 WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $pid]);
+        
         if ($_SESSION['cart'][$pid]['quantity'] <= 0) {
           unset($_SESSION['cart'][$pid]);
+          
+          // DB Sync Remove
+          $stmt = $pdo->prepare("DELETE FROM cart_items WHERE session_id = ? AND product_id = ?");
+          $stmt->execute([$sessionId, $pid]);
         }
       }
       $redirect = 'shop-product-details.php?id=' . ($productId > 0 ? $productId : $pid) . '&cart_open=1';
@@ -82,6 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['wish_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO wishlist (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $pid]);
         } else {
           $_SESSION['wish_message'] = 'Invalid product data';
         }
@@ -90,6 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['wish_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['wishlist'][$pid])) {
         unset($_SESSION['wishlist'][$pid]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM wishlist WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $pid]);
       }
       $redirect = 'shop-product-details.php?id=' . ($productId > 0 ? $productId : $pid) . '&wish_open=1';
     }
@@ -123,6 +149,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
             'db_id' => $dbId,
           ];
           $_SESSION['compare_message'] = '';
+          
+          // DB Sync
+          $stmt = $pdo->prepare("INSERT IGNORE INTO compare (session_id, product_id) VALUES (?, ?)");
+          $stmt->execute([$sessionId, $pid]);
         } else {
           $_SESSION['compare_message'] = 'Invalid product data';
         }
@@ -131,6 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['compare_action'])) {
     } elseif ($action === 'remove') {
       if (isset($_SESSION['compare'][$pid])) {
         unset($_SESSION['compare'][$pid]);
+        
+        // DB Sync
+        $stmt = $pdo->prepare("DELETE FROM compare WHERE session_id = ? AND product_id = ?");
+        $stmt->execute([$sessionId, $pid]);
       }
       $redirect = 'shop-product-details.php?id=' . ($productId > 0 ? $productId : $pid) . '&compare_open=1';
     }
@@ -233,15 +267,15 @@ $related = $product ? getRelated($pdo, (int)$product['id']) : [];
         </div>
         <ul class="nav-links">
           <li><a href="index.php">Home</a></li>
-          <li>
-            <a href="#">Shop ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Shop ▾</a>
             <ul class="dropdown">
               <li><a href="shop-list-view.php">Shop List View</a></li>
               <li><a href="#">Shop Product-details</a></li>
             </ul>
           </li>
-          <li>
-            <a href="#">Pages ▾</a>
+          <li class="dropdown-container">
+            <a href="javascript:void(0)" class="dropdown-trigger">Pages ▾</a>
             <ul class="dropdown">
               <li><a href="blog.php">Blog</a></li>
               <li><a href="faq.php">FAQ</a></li>
